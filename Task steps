@@ -2,6 +2,8 @@ Steps for project.
 
 Download link of the project: https://github.com/tgchacko/Walmart-Sales-Forecasting/blob/main/Walmart.csv
 
+Installing the necessary libarires. 
+
 import pandas as pd
 import numpy as np
 import warnings
@@ -10,3 +12,238 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
+
+Load the CSV file.
+data=pd.read_csv('/content/Walmart.csv')
+data.head()
+
+Convert Date column to datetime. 
+# Convert Date column to datetime
+data['Date'] = pd.to_datetime(data['Date'], dayfirst=True)
+
+# Check data types
+data.info()
+
+Aggregate Sales by Week
+Weekly Sales Aggregation
+
+# Aggregate weekly sales
+weekly_sales = (
+    data
+    .groupby(pd.Grouper(key='Date', freq='W'))['Weekly_Sales']
+    .sum()
+    .reset_index()
+)
+
+weekly_sales.head()
+
+Aggregate Sales by Month
+Monthly Sales Aggregation
+
+# Aggregate monthly sales
+monthly_sales = (
+    data
+    .groupby(pd.Grouper(key='Date', freq='M'))['Weekly_Sales']
+    .sum()
+    .reset_index()
+)
+
+monthly_sales.head()
+
+Set Date as Index (Cleaner for Forecasting)
+# Set Date as index
+data_ts = data.set_index('Date')
+
+# Monthly aggregation
+monthly_sales = data_ts['Weekly_Sales'].resample('M').sum()
+monthly_sales.head()
+
+Sales data was aggregated at weekly and monthly levels using groupby with time-based grouping. Weekly aggregation helps capture short-term seasonality, while monthly aggregation smooths volatility and highlights long-term trends for forecasting models.
+
+Plot Sales Trend Over Time (Monthly)
+Python Code (matplotlib)
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Load dataset
+df = pd.read_csv("Walmart.csv")
+
+# Convert Date column to datetime
+df['Date'] = pd.to_datetime(df['Date'], dayfirst=True)
+
+# Aggregate sales by month
+monthly_sales = (
+    df.groupby(pd.Grouper(key='Date', freq='M'))['Weekly_Sales']
+      .sum()
+      .reset_index()
+)
+
+# Plot sales trend
+plt.figure()
+plt.plot(monthly_sales['Date'], monthly_sales['Weekly_Sales'])
+plt.xlabel("Date")
+plt.ylabel("Total Sales")
+plt.title("Monthly Sales Trend Over Time")
+plt.show()
+
+Monthly Sales Trend Line Chart
+X-axis: Date (2010–2012)
+
+Y-axis: Total Monthly Sales
+Sales show clear seasonal spikes, especially around:
+End of the year (holiday periods)
+Early-year promotional cycles
+Overall pattern indicates repeating seasonality, not random noise
+
+This confirms the dataset is well-suited for time-series forecasting models like:
+ARIMA
+SARIMA (seasonal)
+Holt-Winters Exponential Smoothing
+
+The monthly sales trend shows recurring seasonal peaks and fluctuations over time, indicating strong seasonality in retail demand. This pattern supports the use of seasonal time-series models such as SARIMA for accurate sales forecasting.
+
+Check Seasonality Using Rolling Mean
+Concept (1 line)
+A rolling mean smooths short-term fluctuations and highlights trend + seasonality in time-series data.
+Python Code (Monthly Rolling Mean)
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Load dataset
+df = pd.read_csv("Walmart.csv")
+
+# Convert Date column
+df['Date'] = pd.to_datetime(df['Date'], dayfirst=True)
+
+# Aggregate sales by month
+monthly_sales = (
+    df.groupby(pd.Grouper(key='Date', freq='M'))['Weekly_Sales']
+      .sum()
+)
+
+# Calculate rolling mean (3-month window)
+rolling_mean = monthly_sales.rolling(window=3).mean()
+
+# Plot original sales and rolling mean
+plt.figure()
+plt.plot(monthly_sales, label='Monthly Sales')
+plt.plot(rolling_mean, label='3-Month Rolling Mean')
+plt.xlabel("Date")
+plt.ylabel("Total Sales")
+plt.title("Seasonality Check Using Rolling Mean")
+plt.legend()
+plt.show()
+
+rolling_mean.dropna().head()
+
+Insights from Rolling Mean Plot
+Monthly sales (blue line) show repeating peaks and dips
+Rolling mean (orange line) smooths volatility and reveals:
+A stable long-term trend
+Clear seasonal fluctuations
+Sales spikes repeat across years → strong seasonality present
+A rolling mean smooths short-term fluctuations and highlights trend + seasonality in time-series data.
+
+The rolling mean smooths short-term noise and reveals a consistent seasonal pattern in monthly sales. The presence of recurring peaks confirms seasonality, indicating that seasonal models like SARIMA are suitable for forecasting.
+
+Train–Test Split by Time
+For time-series forecasting, random splitting is wrong.
+We always split chronologically so the model learns from the past and predicts the future.
+
+Python Code (Monthly Data)
+import pandas as pd
+# Load dataset
+df = pd.read_csv("Walmart.csv")
+
+# Convert Date column
+df['Date'] = pd.to_datetime(df['Date'], dayfirst=True)
+
+# Aggregate sales by month
+monthly_sales = (
+    df.groupby(pd.Grouper(key='Date', freq='M'))['Weekly_Sales']
+      .sum()
+      .reset_index()
+)
+
+# Sort by date
+monthly_sales = monthly_sales.sort_values('Date')
+
+# Time-based split (80% train, 20% test)
+split_index = int(len(monthly_sales) * 0.8)
+
+train = monthly_sales.iloc[:split_index]
+test  = monthly_sales.iloc[split_index:]
+train.head(), test.head(), train.shape
+
+Interpretation
+Train set → historical sales used to fit the model
+Test set → future sales used to evaluate forecast accuracy
+
+Visual Check
+import matplotlib.pyplot as plt
+
+plt.figure()
+plt.plot(train['Date'], train['Weekly_Sales'], label='Train')
+plt.plot(test['Date'], test['Weekly_Sales'], label='Test')
+plt.title("Train-Test Split by Time")
+plt.xlabel("Date")
+plt.ylabel("Sales")
+plt.legend()
+plt.show()
+
+The dataset was split into training and testing sets based on time order to prevent data leakage. The model was trained on historical data and evaluated on future periods to ensure realistic forecasting performance.
+
+Moving Average Forecast
+Idea (simple & intuitive)
+
+Uses the average of last N periods to forecast future values.
+Good as a baseline model.
+
+Moving Average (3-Month Window)
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Load data
+df = pd.read_csv("Walmart.csv")
+df['Date'] = pd.to_datetime(df['Date'], dayfirst=True)
+
+# Monthly aggregation
+monthly_sales = (
+    df.groupby(pd.Grouper(key='Date', freq='M'))['Weekly_Sales']
+      .sum()
+      .sort_index()
+)
+
+# Train-test split
+split_index = int(len(monthly_sales) * 0.8)
+train = monthly_sales.iloc[:split_index]
+test = monthly_sales.iloc[split_index:]
+
+# Moving Average Forecast (window = 3)
+ma_window = 3
+ma_forecast = train.rolling(window=ma_window).mean().iloc[-1]
+
+# Repeat forecast for test length
+ma_predictions = [ma_forecast] * len(test)
+
+# Plot
+plt.figure()
+plt.plot(train.index, train, label="Train")
+plt.plot(test.index, test, label="Actual Test")
+plt.plot(test.index, ma_predictions, label="Moving Avg Forecast")
+plt.legend()
+plt.title("Moving Average Forecast")
+plt.show()
+
+print("Moving Average Forecast Value:", ma_forecast)
+
+Interpretation
+Forecast is a flat line
+Captures level but not trend or seasonality
+Used mainly as a benchmark model
+
+Exponential Smoothing (Recommended)
+Why better?
+Assigns more weight to recent observations
+Can model trend & seasonality
+Widely used in retail forecasting
