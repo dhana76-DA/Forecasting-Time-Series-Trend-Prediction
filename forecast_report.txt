@@ -1,0 +1,102 @@
+SALES FORECASTING PROJECT REPORT
+--------------------------------
+
+1. PROJECT OVERVIEW
+This project focuses on forecasting retail sales using historical Walmart sales data.
+The objective is to analyze past sales trends, identify seasonality, and build reliable
+time-series forecasting models to predict future sales. Accurate forecasting helps
+businesses improve inventory planning, demand management, and strategic decision-making.
+
+The analysis was performed using Python in Google Colab with time-series techniques such
+as Moving Average and Holt-Winters Exponential Smoothing.
+
+
+2. DATASET DETAILS
+The dataset contains historical weekly sales data from Walmart stores along with
+supporting economic and environmental variables.
+
+Key Columns:
+- Date: Weekly sales date
+- Weekly_Sales: Total sales amount
+- Store: Store identifier
+- Holiday_Flag: Indicates holiday weeks
+- Temperature, Fuel_Price, CPI, Unemployment: External influencing factors
+
+The weekly sales data was aggregated to a monthly level to better capture long-term
+trends and seasonal patterns.
+
+
+3. METHODOLOGY
+The project followed a structured forecasting pipeline:
+- Data loading and cleaning
+- Date conversion and time indexing
+- Monthly sales aggregation
+- Trend visualization and seasonality analysis
+- Rolling mean analysis to confirm seasonality
+- Time-based train-test split (80% train, 20% test)
+- Model building using:
+  - Moving Average (baseline model)
+  - Holt-Winters Exponential Smoothing
+- Forecasting future sales periods
+- Model evaluation using MAE and MAPE metrics
+
+
+4. MODEL PERFORMANCE
+The Moving Average model provided a simple baseline but failed to capture trend and
+seasonality effectively.
+
+The Holt-Winters Exponential Smoothing model performed significantly better by capturing:
+- Long-term trend
+- Seasonal fluctuations
+- Changes in demand over time
+
+Evaluation Metrics:
+- Mean Absolute Error (MAE): ~1.8 × 10^7
+- Mean Absolute Percentage Error (MAPE): ~6–7%
+
+These results indicate strong forecasting accuracy for retail sales data.
+
+
+5. BUSINESS INSIGHTS
+- Sales show strong seasonality with consistent peaks during holiday months
+  (November–December).
+- Post-holiday months experience a noticeable decline in sales.
+- Sales trends remain relatively stable year-over-year, indicating predictable demand
+  cycles.
+- Seasonal forecasting models are essential for retail businesses to avoid understocking
+  or overstocking.
+
+Business Impact:
+- Helps optimize inventory levels
+- Improves supply chain planning
+- Supports promotional and pricing strategies
+- Reduces operational costs due to better demand estimation
+
+
+6. FUTURE SALES PREDICTIONS
+The trained Holt-Winters model was used to forecast future sales periods.
+The forecasted values continue the observed seasonal pattern, with higher sales during
+holiday periods and moderate sales during non-holiday months.
+
+These forecasts can assist businesses in:
+- Planning inventory procurement
+- Staffing decisions
+- Marketing campaign timing
+- Financial forecasting and budgeting
+
+
+7. RECOMMENDATIONS FOR IMPROVEMENT
+To further improve forecasting accuracy and business value:
+- Use SARIMA models for advanced seasonal modeling
+- Incorporate external variables such as promotions and holidays explicitly
+- Perform hyperparameter tuning for model optimization
+- Extend the forecast horizon for long-term planning
+- Compare statistical models with machine learning approaches (XGBoost, LSTM)
+
+
+8. FINAL CONCLUSION
+The sales forecasting project successfully demonstrated how time-series analysis can be
+used to predict future retail sales. Among the models tested, Holt-Winters Exponential
+Smoothing provided the most accurate and reliable results by capturing both trend and
+seasonality. The insights derived from this analysis can help businesses make informed,
+data-driven decisions and improve overall operational efficiency.
